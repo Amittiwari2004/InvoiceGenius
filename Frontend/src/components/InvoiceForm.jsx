@@ -1,93 +1,106 @@
-import React, { useEffect, useState } from 'react';
-import { Store, FileText, Image, Palette, Package, Trash2, Building2, Phone, Mail, Calendar, Clock, User, MapPin, CreditCard, Receipt } from 'lucide-react';
-import { toast } from 'react-toastify';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import {
+  Store,
+  FileText,
+  Image,
+  Palette,
+  Package,
+  Trash2,
+  Building2,
+  Phone,
+  Mail,
+  Calendar,
+  Clock,
+  User,
+  MapPin,
+  CreditCard,
+  Receipt,
+} from "lucide-react";
+import { toast } from "react-toastify";
+import axios from "axios";
 
-
- const backendUrl = import.meta.env.VITE_BACKEND_URL.replace(/\/+$/, "");
-
-
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL.replace(/\/+$/, "");
 
 const InvoiceForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
-    storeName: '',
+    storeName: "",
     storeDetails: {
-      address: '',
-      city: '',
-      phone: '',
-      email: ''
+      address: "",
+      city: "",
+      phone: "",
+      email: "",
     },
     invoiceDetails: {
-      invoiceNumber: '',
-      orderNumber: '',
-      date: new Date().toISOString().split('T')[0],
-      time: new Date().toLocaleTimeString('en-US', { hour12: false })
+      invoiceNumber: "",
+      orderNumber: "",
+      date: new Date().toISOString().split("T")[0],
+      time: new Date().toLocaleTimeString("en-US", { hour12: false }),
     },
     customer: {
-      name: '',
-      address: '',
-      city: '',
-      phone: '',
-      email: ''
+      name: "",
+      address: "",
+      city: "",
+      phone: "",
+      email: "",
     },
     deliveryPartner: {
-      name: '',
-      trackingId: '',
-      estimatedDelivery: ''
+      name: "",
+      trackingId: "",
+      estimatedDelivery: "",
     },
-    color: '#2c3e50',
+    color: "#2c3e50",
     logo: null,
     products: [
       {
-        name: '',
-        brand: '',
-        batch: '',
-        expiry: '',
-        quantity: '',
-        mrp: '',
-        price: ''
-      }
+        name: "",
+        brand: "",
+        batch: "",
+        expiry: "",
+        quantity: "",
+        mrp: "",
+        price: "",
+      },
     ],
-    paymentMethod: '',
-    termsAndConditions: ''
+    paymentMethod: "",
+    termsAndConditions: "",
   });
   const [pdfUrl, setPdfUrl] = useState(null);
 
   const handleChange = (e, section = null) => {
     const { name, value } = e.target;
     if (section) {
-      setFormData(prevState => ({
+      setFormData((prevState) => ({
         ...prevState,
         [section]: {
           ...prevState[section],
-          [name]: value
-        }
+          [name]: value,
+        },
       }));
     } else {
-      setFormData(prevState => ({
+      setFormData((prevState) => ({
         ...prevState,
-        [name]: value
+        [name]: value,
       }));
     }
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
-      if (file.size <= 5 * 1024 * 1024) { // 5MB limit
-        setFormData(prevState => ({
+    if (file && (file.type === "image/jpeg" || file.type === "image/png")) {
+      if (file.size <= 5 * 1024 * 1024) {
+        // 5MB limit
+        setFormData((prevState) => ({
           ...prevState,
-          logo: file
+          logo: file,
         }));
         setError(null);
       } else {
-        setError('File size should be less than 5MB');
+        setError("File size should be less than 5MB");
       }
     } else {
-      setError('Please upload a valid JPG or PNG image');
+      setError("Please upload a valid JPG or PNG image");
     }
   };
 
@@ -95,56 +108,61 @@ const InvoiceForm = () => {
     const { name, value } = e.target;
     const updatedProducts = [...formData.products];
     updatedProducts[index] = { ...updatedProducts[index], [name]: value };
-    setFormData(prevState => ({
+    setFormData((prevState) => ({
       ...prevState,
-      products: updatedProducts
+      products: updatedProducts,
     }));
   };
 
   const addProduct = () => {
-    setFormData(prevState => ({
+    setFormData((prevState) => ({
       ...prevState,
-      products: [...prevState.products, {
-        name: '',
-        brand: '',
-        batch: '',
-        expiry: '',
-        quantity: '',
-        mrp: '',
-        price: ''
-      }]
+      products: [
+        ...prevState.products,
+        {
+          name: "",
+          brand: "",
+          batch: "",
+          expiry: "",
+          quantity: "",
+          mrp: "",
+          price: "",
+        },
+      ],
     }));
   };
 
   const removeProduct = (index) => {
     if (formData.products.length > 1) {
-      setFormData(prevState => ({
+      setFormData((prevState) => ({
         ...prevState,
-        products: prevState.products.filter((_, i) => i !== index)
+        products: prevState.products.filter((_, i) => i !== index),
       }));
     }
   };
 
   const validateForm = () => {
     if (!formData.storeName || !formData.logo) return false;
-    if (!formData.storeDetails.address || !formData.storeDetails.phone) return false;
+    if (!formData.storeDetails.address || !formData.storeDetails.phone)
+      return false;
     if (!formData.customer.name || !formData.customer.phone) return false;
     if (!formData.paymentMethod) return false;
     if (!formData.termsAndConditions) return false;
-    
-    return formData.products.every(product => 
-      product.name && 
-      product.quantity && 
-      product.mrp && 
-      product.price && 
-      parseFloat(product.price) <= parseFloat(product.mrp)
+
+    return formData.products.every(
+      (product) =>
+        product.name &&
+        product.quantity &&
+        product.mrp &&
+        product.price &&
+        parseFloat(product.price) <= parseFloat(product.mrp)
     );
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
-      setError('Please fill in all required fields');
+      setError("Please fill in all required fields");
       return;
     }
 
@@ -153,41 +171,47 @@ const InvoiceForm = () => {
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append('logo', formData.logo);
-      formDataToSend.append('data', JSON.stringify(formData));
+      formDataToSend.append("logo", formData.logo);
+      formDataToSend.append("data", JSON.stringify(formData));
 
-     
+      const response = await axios.post(
+        `${backendUrl}/generate-invoice`,
+        formDataToSend,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          responseType: "blob",
+        }
+      );
 
-      const response = await axios.post(`${backendUrl}/generate-invoice`, formDataToSend, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        responseType: 'blob',
-      });
-
-     
-
-      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const blob = new Blob([response.data], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
 
       setPdfUrl(url);
       toast.success("The invoice has been generated successfully");
     } catch (err) {
-      console.error('Error details:', err);
-      setError(err.response?.data?.message || err.message || 'Failed to generate invoice');
+      console.error("Error details:", err);
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to generate invoice"
+      );
       toast.error("Failed to generate invoice");
     } finally {
       setLoading(false);
     }
   };
   useEffect(() => {
-    console.log('pdfUrl state changed!!');
+    console.log("pdfUrl state changed!!");
   }, [pdfUrl]);
 
   if (pdfUrl) {
     return (
       <div className="max-w-6xl mx-auto p-6">
-        <h2 className="text-2xl font-bold mb-4">Invoice Generated Successfully!</h2>
+        <h2 className="text-2xl font-bold mb-4">
+          Invoice Generated Successfully!
+        </h2>
         <iframe
           src={pdfUrl}
           className="w-full h-[600px] border border-gray-300 rounded"
@@ -224,11 +248,13 @@ const InvoiceForm = () => {
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="mb-6 p-4 bg-blue-100 border border-blue-300 text-blue-700 rounded">
           <p>
-            For any fields where you  {"don't"}  have a value, you can enter {"NaN"}  as a placeholder.
+            For any fields where you {"don't"} have a value, you can enter{" "}
+            {"NaN"} as a placeholder.
           </p>
-          <p style="color: red; font-weight: bold;">
-  Warning: Please avoid using excessively long addresses, as it may cause formatting issues.
-</p>
+          <p>
+            Warning: Please avoid using excessively long addresses, as it may
+            cause formatting issues.
+          </p>
         </div>
         {/* Store Information */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -259,7 +285,7 @@ const InvoiceForm = () => {
                   type="text"
                   name="address"
                   value={formData.storeDetails.address}
-                  onChange={(e) => handleChange(e, 'storeDetails')}
+                  onChange={(e) => handleChange(e, "storeDetails")}
                   className="w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                   required
                 />
@@ -272,7 +298,7 @@ const InvoiceForm = () => {
                   type="text"
                   name="city"
                   value={formData.storeDetails.city}
-                  onChange={(e) => handleChange(e, 'storeDetails')}
+                  onChange={(e) => handleChange(e, "storeDetails")}
                   className="w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                   required
                 />
@@ -285,7 +311,7 @@ const InvoiceForm = () => {
                   type="tel"
                   name="phone"
                   value={formData.storeDetails.phone}
-                  onChange={(e) => handleChange(e, 'storeDetails')}
+                  onChange={(e) => handleChange(e, "storeDetails")}
                   className="w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                   required
                 />
@@ -298,7 +324,7 @@ const InvoiceForm = () => {
                   type="email"
                   name="email"
                   value={formData.storeDetails.email}
-                  onChange={(e) => handleChange(e, 'storeDetails')}
+                  onChange={(e) => handleChange(e, "storeDetails")}
                   className="w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                   required
                 />
@@ -321,7 +347,7 @@ const InvoiceForm = () => {
                   type="text"
                   name="invoiceNumber"
                   value={formData.invoiceDetails.invoiceNumber}
-                  onChange={(e) => handleChange(e, 'invoiceDetails')}
+                  onChange={(e) => handleChange(e, "invoiceDetails")}
                   className="w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                   required
                 />
@@ -334,7 +360,7 @@ const InvoiceForm = () => {
                   type="text"
                   name="orderNumber"
                   value={formData.invoiceDetails.orderNumber}
-                  onChange={(e) => handleChange(e, 'invoiceDetails')}
+                  onChange={(e) => handleChange(e, "invoiceDetails")}
                   className="w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                   required
                 />
@@ -347,7 +373,7 @@ const InvoiceForm = () => {
                   type="date"
                   name="date"
                   value={formData.invoiceDetails.date}
-                  onChange={(e) => handleChange(e, 'invoiceDetails')}
+                  onChange={(e) => handleChange(e, "invoiceDetails")}
                   className="w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                   required
                 />
@@ -360,7 +386,7 @@ const InvoiceForm = () => {
                   type="time"
                   name="time"
                   value={formData.invoiceDetails.time}
-                  onChange={(e) => handleChange(e, 'invoiceDetails')}
+                  onChange={(e) => handleChange(e, "invoiceDetails")}
                   className="w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                   required
                 />
@@ -384,7 +410,7 @@ const InvoiceForm = () => {
                 type="text"
                 name="name"
                 value={formData.customer.name}
-                onChange={(e) => handleChange(e, 'customer')}
+                onChange={(e) => handleChange(e, "customer")}
                 className="w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                 required
               />
@@ -397,7 +423,7 @@ const InvoiceForm = () => {
                 type="tel"
                 name="phone"
                 value={formData.customer.phone}
-                onChange={(e) => handleChange(e, 'customer')}
+                onChange={(e) => handleChange(e, "customer")}
                 className="w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                 required
               />
@@ -410,7 +436,7 @@ const InvoiceForm = () => {
                 type="email"
                 name="email"
                 value={formData.customer.email}
-                onChange={(e) => handleChange(e, 'customer')}
+                onChange={(e) => handleChange(e, "customer")}
                 className="w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
@@ -422,7 +448,7 @@ const InvoiceForm = () => {
                 type="text"
                 name="address"
                 value={formData.customer.address}
-                onChange={(e) => handleChange(e, 'customer')}
+                onChange={(e) => handleChange(e, "customer")}
                 className="w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                 required
               />
@@ -435,7 +461,7 @@ const InvoiceForm = () => {
                 type="text"
                 name="city"
                 value={formData.customer.city}
-                onChange={(e) => handleChange(e, 'customer')}
+                onChange={(e) => handleChange(e, "customer")}
                 className="w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                 required
               />
@@ -458,7 +484,7 @@ const InvoiceForm = () => {
                 type="text"
                 name="name"
                 value={formData.deliveryPartner.name}
-                onChange={(e) => handleChange(e, 'deliveryPartner')}
+                onChange={(e) => handleChange(e, "deliveryPartner")}
                 className="w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                 required
               />
@@ -471,7 +497,7 @@ const InvoiceForm = () => {
                 type="text"
                 name="trackingId"
                 value={formData.deliveryPartner.trackingId}
-                onChange={(e) => handleChange(e, 'deliveryPartner')}
+                onChange={(e) => handleChange(e, "deliveryPartner")}
                 className="w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                 required
               />
@@ -484,7 +510,7 @@ const InvoiceForm = () => {
                 type="date"
                 name="estimatedDelivery"
                 value={formData.deliveryPartner.estimatedDelivery}
-                onChange={(e) => handleChange(e, 'deliveryPartner')}
+                onChange={(e) => handleChange(e, "deliveryPartner")}
                 className="w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                 required
               />
@@ -532,8 +558,20 @@ const InvoiceForm = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  {['Name', 'Brand', 'Batch', 'Expiry', 'Quantity', 'MRP', 'Price', 'Actions'].map((header) => (
-                    <th key={header} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {[
+                    "Name",
+                    "Brand",
+                    "Batch",
+                    "Expiry",
+                    "Quantity",
+                    "MRP",
+                    "Price",
+                    "Actions",
+                  ].map((header) => (
+                    <th
+                      key={header}
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       {header}
                     </th>
                   ))}
@@ -685,9 +723,25 @@ const InvoiceForm = () => {
           >
             {loading ? (
               <>
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
                 Generating Invoice...
               </>
@@ -705,4 +759,3 @@ const InvoiceForm = () => {
 };
 
 export default InvoiceForm;
-
