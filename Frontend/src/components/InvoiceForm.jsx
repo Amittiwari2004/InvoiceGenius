@@ -226,6 +226,9 @@ const InvoiceForm = () => {
           <p>
             For any fields where you  {"don't"}  have a value, you can enter {"NaN"}  as a placeholder.
           </p>
+          <p style="color: red; font-weight: bold;">
+  Warning: Please avoid using excessively long addresses, as it may cause formatting issues.
+</p>
         </div>
         {/* Store Information */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
