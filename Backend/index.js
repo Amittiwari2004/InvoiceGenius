@@ -407,6 +407,10 @@ app.use((err, req, res, next) => {
   });
 });
 
+app.use((req,res)=>{
+  res.send("Server Working");
+})
+
 // Start server
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
