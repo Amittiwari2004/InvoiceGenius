@@ -5,7 +5,7 @@ import axios from 'axios';
 
 
  const backendUrl = import.meta.env.VITE_BACKEND_URL.replace(/\/+$/, "");
- console.log(backendUrl)
+
 
 
 
@@ -156,7 +156,7 @@ const InvoiceForm = () => {
       formDataToSend.append('logo', formData.logo);
       formDataToSend.append('data', JSON.stringify(formData));
 
-      console.log('Sending request to:', `${backendUrl}/generate-invoice`);
+     
 
       const response = await axios.post(`${backendUrl}/generate-invoice`, formDataToSend, {
         headers: {
@@ -165,11 +165,11 @@ const InvoiceForm = () => {
         responseType: 'blob',
       });
 
-      console.log('Response received:', response);
+     
 
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
-      console.log('PDF URL created:', url);
+
       setPdfUrl(url);
       toast.success("The invoice has been generated successfully");
     } catch (err) {
