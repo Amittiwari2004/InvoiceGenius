@@ -239,7 +239,7 @@ const InvoiceForm = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white shadow-lg rounded-lg">
-      <h1 className="text-3xl font-bold mb-6 text-center">Generate Invoice</h1>
+
       {error && (
         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
           {error}
