@@ -246,11 +246,13 @@ const InvoiceForm = () => {
         </div>
       )}
       <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="mb-6 p-4 bg-blue-100 border border-blue-300 text-blue-700 rounded">
+        <div className=" p-4 bg-blue-100 border border-blue-300 text-blue-700 rounded">
           <p>
             For any fields where you {"don't"} have a value, you can enter{" "}
             {"NaN"} as a placeholder.
           </p>
+        </div>
+        <div className="mb-6 p-4 bg-red-100 border border-red-300 text-red-700 rounded">
           <p>
             Warning: Please avoid using excessively long addresses, as it may
             cause formatting issues.
