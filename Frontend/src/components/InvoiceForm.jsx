@@ -181,7 +181,7 @@ const InvoiceForm = () => {
     }
   };
   useEffect(() => {
-    console.log('pdfUrl state changed:', pdfUrl);
+    console.log('pdfUrl state changed!!');
   }, [pdfUrl]);
 
   if (pdfUrl) {
